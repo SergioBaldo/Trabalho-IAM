@@ -1,9 +1,26 @@
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
 
 def create_individual(size_of_individual, name_of_features):
-    pass
+    """
+    Create an individual for a genetic algorithm with a specified size.
+
+    Parameters:
+        size_of_individual (int): The number of features in the individual.
+        name_of_features (list): List of available feature names to choose from.
+
+    Returns:
+        list: An individual with randomly selected feature names.
+    """
+    # Shuffle the list of feature names to create a random order
+    np.random.shuffle(name_of_features)
+
+    # Create the individual by selecting the first 'size_of_individual' names
+    individual = name_of_features[:size_of_individual]
+
+    return individual
 
 
 def roulette_selection(fitness, population, k_tour=2):
@@ -95,6 +112,8 @@ def two_point_crossover(parent1, parent2, cprob):
 
 
 def fitness_function(individual, fitness_has_table):
+    df_train = pd.read_csv("/data/interim/dataset_ga_train.csv")
+    df_test = pd.read_csv("/data/interim/dataset_ga_test.csv")
     pass
 
 
