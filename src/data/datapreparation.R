@@ -78,6 +78,6 @@ dataset <- as.data.frame(t(exp_matrix)) # transpose
 all(rownames(dataset) %in% rownames(meta_matrix)) #TRUE
 all(rownames(dataset) == rownames(meta_matrix)) #TRUE
 
-dataset$subtype <- rownames(meta_matrix) # add new column w/ patient's subtype
+dataset$subtype <- meta_matrix$subtypes # add new column w/ patient's subtype
 
 save(dataset, file = "./dataset.csv") # save as csv
