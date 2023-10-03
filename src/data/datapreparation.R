@@ -28,7 +28,7 @@ meta_matrix <- meta_matrix[!duplicated(meta_matrix$patient),] # remove duplicate
 table(is.na(meta_matrix$subtypes)) # remove NAs (39)
 meta_matrix <- meta_matrix[!is.na(meta_matrix$subtypes),] # 632 samples
 
-meta_matrix[meta_matrix$subtypes %in% 'PA-like', ]$subtypes <- 'LGm6-GBM' # WHO recomendation
+meta_matrix[meta_matrix$subtypes %in% 'PA-like', ]$subtypes <- 'LGm6-GBM' # WHO recommendation
 
 rownames(meta_matrix) <- meta_matrix$patient
 meta_matrix$patient <- NULL
@@ -66,11 +66,14 @@ exp_matrix$gene_id <- NULL
 
 exp_matrix <- exp_matrix[rownames(exp_matrix) %in% gencode.coding$gene_id,]
 
-dim(exp_matrix) # 19920  632
+    ### Filtering genes with expression level = 0 in all patients
+exp_matrix <- exp_matrix[rowSums(exp_matrix) > 0,]
+
+dim(exp_matrix) # 19499  632
 
 # Save objects as csv
-save(exp_matrix, file = "./data.csv")
-save(meta_matrix, file = "./meta.csv")
+save(exp_matrix, file = "data/raw/data.csv")
+save(meta_matrix, file = "data/raw/meta.csv")
 
 # Join both expression data and subtype information in a single dataframe
 dataset <- as.data.frame(t(exp_matrix)) # transpose
@@ -80,4 +83,6 @@ all(rownames(dataset) == rownames(meta_matrix)) #TRUE
 
 dataset$subtype <- meta_matrix$subtypes # add new column w/ patient's subtype
 
-save(dataset, file = "./dataset.csv") # save as csv
+dim(dataset) # 632  19500
+
+save(dataset, file = "data/processed/dataset.csv") # save as csv
