@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import time
 import os
 from dotenv import load_dotenv
@@ -12,6 +13,7 @@ CROSSOVER_PROB = float(os.environ.get("CROSSOVER_PROB"))
 TOUR_SIZE = int(os.environ.get("TOUR_SIZE"))
 SELECTION = os.environ.get("SELECTION")
 INDIVIDUAL_SIZE = int(os.environ.get("INDIVIDUAL_SIZE"))
+DATA_PATH = os.environ.get("DATA_PATH")
 
 
 class GeneticSearch:
@@ -42,15 +44,17 @@ class GeneticSearch:
         self.selection = selection
         self.individual_size = individual_size
 
-    def open_data(self):
+    def open_data(self, filepath):
         """
         Load and return training and validation data.
 
         Returns:
-            tuple: A tuple containing two empty lists representing training and validation data.
+            tuple: A tuple containing two dataframes representing training and validation data.
         """
-        df_train_GA = []
-        df_validation_GA = []
+        filepath = f"{filepath}/processed/"
+        df_train_GA = pd.read_csv(f"{filepath}dataGA_train.csv", index_col=None)
+        df_validation_GA = pd.read_csv(f"{filepath}dataGA_test.csv", index_col=None)
+
         return df_train_GA, df_validation_GA
 
     def search(self):
@@ -59,9 +63,10 @@ class GeneticSearch:
 
         This method initializes populations, calculates fitness, and evolves populations over generations.
         """
-        df_train_GA, df_validation_GA = self.open_data()
+        df_train_GA, df_validation_GA = self.open_data(filepath=DATA_PATH)
 
-        feature_names = [f"feature{i}" for i in range(20000)]
+        feature_names = list(df_train_GA.columns)
+        feature_names.remove("subtype")
 
         start_time_AG = time.time()
 
@@ -84,18 +89,19 @@ class GeneticSearch:
             print(f"Generation: {gen}")
 
             fitness = np.zeros(self.popsize)
-            score = np.zeros(self.popsize)
+            accuracy = np.zeros(self.popsize)
 
             # Calculate the fitness of each individual
             for individual in range(self.popsize):
-                score[individual], fitness[individual] = fitness_function(
+                accuracy[individual], fitness[individual] = fitness_function(
                     individual=population[individual],
                     df_train=df_train_GA,
                     df_validation=df_validation_GA,
                     fitness_has_table=fitness_has_table,
                 )
-
-            output_score[gen] = np.max(score)
+                break
+            break
+            output_score[gen] = np.max(accuracy)
             output[gen, 0] = np.mean(fitness)  # Mean fitness of the population
             output[gen, 1] = np.std(fitness)  # Fitness standard deviation
             output[gen, 2] = np.max(fitness)  # Best fitness

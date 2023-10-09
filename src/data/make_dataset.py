@@ -39,13 +39,11 @@ def preprocess_and_split_data(input_filepath, output_filepath_prefix) -> None:
     df_train = pd.concat([X_train, y_train], axis=1)
     df_test = pd.concat([X_test, y_test], axis=1)
 
-    print(df_test)
-
     # Save the training and testing sets as separate CSV files
     train_output_filepath = f"{output_filepath_prefix}_train.csv"
     test_output_filepath = f"{output_filepath_prefix}_test.csv"
-    df_train.to_csv(train_output_filepath, index=True)
-    df_test.to_csv(test_output_filepath, index=True)
+    df_train.to_csv(train_output_filepath, index=False)
+    df_test.to_csv(test_output_filepath, index=False)
 
 
 if __name__ == "__main__":
@@ -61,5 +59,5 @@ if __name__ == "__main__":
     # Preprocess and split the processed training dataset
     preprocess_and_split_data(
         input_filepath=f"{processed_path}data_train.csv",
-        output_filepath_prefix=f"{processed_path}dataAG",
+        output_filepath_prefix=f"{processed_path}dataGA",
     )
