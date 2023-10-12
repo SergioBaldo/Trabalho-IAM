@@ -1,30 +1,34 @@
-import numpy as np
-import pandas as pd
-import time
 import os
-from dotenv import load_dotenv
-from ga_functions import create_individual, fitness_function
+import time
+import pandas as pd
+import numpy as np
+import random
+from tqdm import trange
+from dotenv import load_dotenv, find_dotenv
+from src.genetic_algorithm import ga_functions as ga
+from src.genetic_algorithm.utils import create_feature_groups, run_best_individual
+from src.genetic_algorithm.save_ga_results import SaveResults
 
-# Load environment variables
-load_dotenv()
-POPSIZE = int(os.environ.get("POPSIZE"))
-N_GENERATION = int(os.environ.get("N_GENERATION"))
-CROSSOVER_PROB = float(os.environ.get("CROSSOVER_PROB"))
-TOUR_SIZE = int(os.environ.get("TOUR_SIZE"))
-SELECTION = os.environ.get("SELECTION")
-INDIVIDUAL_SIZE = int(os.environ.get("INDIVIDUAL_SIZE"))
+load_dotenv(find_dotenv(), override=True)
 DATA_PATH = os.environ.get("DATA_PATH")
+RESULTS_PATH = os.environ.get("RESULTS_PATH")
+SEED = int(os.environ.get("SEED"))
+
+
+np.random.seed(SEED)
+random.seed(SEED)
 
 
 class GeneticSearch:
     def __init__(
         self,
-        popsize=POPSIZE,
-        ngeneration=N_GENERATION,
-        cprob=CROSSOVER_PROB,
-        tour_size=TOUR_SIZE,
-        selection=SELECTION,
-        individual_size=INDIVIDUAL_SIZE,
+        popsize: int,
+        ngeneration: int,
+        cprob: float,
+        mprob: float,
+        tour_size: int,
+        individual_size: int,
+        elitism: bool,
     ):
         """
         Initialize the GeneticSearch class with parameters.
@@ -33,20 +37,25 @@ class GeneticSearch:
             popsize (int): Population size.
             ngeneration (int): Number of generations.
             cprob (float): Crossover probability.
+            mprob (float): Mutation rate.
             tour_size (int): Tournament size for selection.
-            selection (str): Selection method.
             individual_size (int): Size of each individual.
+            elitism (bool): Whether to use elitism.
         """
         self.popsize = popsize
         self.ngeneration = ngeneration
         self.cprob = cprob
+        self.mprob = mprob
         self.tour_size = tour_size
-        self.selection = selection
         self.individual_size = individual_size
+        self.elitism = elitism
 
-    def open_data(self, filepath):
+    def open_data(self, filepath: str) -> tuple:
         """
         Load and return training and validation data.
+
+        Args:
+            filepath (str): Path to data files.
 
         Returns:
             tuple: A tuple containing two dataframes representing training and validation data.
@@ -54,7 +63,6 @@ class GeneticSearch:
         filepath = f"{filepath}/processed/"
         df_train_GA = pd.read_csv(f"{filepath}dataGA_train.csv", index_col=None)
         df_validation_GA = pd.read_csv(f"{filepath}dataGA_test.csv", index_col=None)
-
         return df_train_GA, df_validation_GA
 
     def search(self):
@@ -64,47 +72,47 @@ class GeneticSearch:
         This method initializes populations, calculates fitness, and evolves populations over generations.
         """
         df_train_GA, df_validation_GA = self.open_data(filepath=DATA_PATH)
-
         feature_names = list(df_train_GA.columns)
-        feature_names.remove("subtype")
+        feature_groups = create_feature_groups(
+            feature_names=feature_names, individual_size=self.individual_size
+        )
 
         start_time_AG = time.time()
-
-        fitness_has_table = {}
 
         # Generate a population with M individuals (initial population)
         population = np.zeros((self.popsize, self.individual_size), dtype="O")
 
-        output = np.zeros((self.ngeneration, 4))
+        fitness_has_table = {}
+        output = np.zeros((self.ngeneration, 3))
         output_score = np.zeros(self.ngeneration)
         bestFitness = float("-inf")
 
         # Generate individuals
         for i in range(self.popsize):
-            population[i] = create_individual(
+            population[i] = ga.create_individual(
                 individual_size=self.individual_size, feature_names=feature_names
             )
 
-        for gen in range(self.ngeneration):
-            print(f"Generation: {gen}")
+        if not os.path.isdir(RESULTS_PATH + f"/SEED_{SEED}"):
+            os.mkdir(RESULTS_PATH + f"/SEED_{SEED}")
 
+        for gen in range(self.ngeneration):
+            print("")
             fitness = np.zeros(self.popsize)
             accuracy = np.zeros(self.popsize)
 
-            # Calculate the fitness of each individual
-            for individual in range(self.popsize):
-                accuracy[individual], fitness[individual] = fitness_function(
+            for individual in trange(self.popsize, desc=f"Generation: {gen}"):
+                accuracy[individual], fitness[individual] = ga.fitness_function(
                     individual=population[individual],
                     df_train=df_train_GA,
                     df_validation=df_validation_GA,
-                    fitness_has_table=fitness_has_table,
+                    fitness_hash_table=fitness_has_table,
                 )
-                break
-            break
+
             output_score[gen] = np.max(accuracy)
-            output[gen, 0] = np.mean(fitness)  # Mean fitness of the population
-            output[gen, 1] = np.std(fitness)  # Fitness standard deviation
-            output[gen, 2] = np.max(fitness)  # Best fitness
+            output[gen, 0] = np.mean(fitness)
+            output[gen, 1] = np.std(fitness)
+            output[gen, 2] = np.max(fitness)
 
             bestFitness_Id = np.argmax(fitness)
 
@@ -112,27 +120,47 @@ class GeneticSearch:
                 bestInd = population[bestFitness_Id]
                 bestFitness = np.max(fitness)
 
-            print(f"Best Fitness gen. {gen}: {bestFitness}")
+            print(f"- Best Fitness (F1 Score Weighted) generation {gen}: {bestFitness:.2f}")
+            run_best_individual(data_path=DATA_PATH, best_individual=bestInd, generation=gen)
 
-            # Generate M children
             children = np.zeros((self.popsize, self.individual_size), dtype="O")
             for j in range(int(self.popsize / 2)):
-                # Selection
-                parent1, parent2 = self.selection(self.tour_size, fitness, population)
+                parent1, parent2 = ga.tournament_selection(
+                    fitness=fitness, population=population, k_tour=self.tour_size
+                )
 
-                # Crossover
-                child1, child2 = self.crossover(parent1, parent2, self.cprob)
+                child1, child2 = ga.two_point_crossover(
+                    parent1=parent1, parent2=parent2, cprob=self.cprob
+                )
 
-                # Mutation
-                child1 = self.mutation(child1, prob=self.cprob, nfeature=self.nFeatures)
-                child2 = self.mutation(child2, prob=self.cprob, nfeature=self.nFeatures)
+                child1 = ga.nominal_mutation(
+                    children=child1,
+                    features_groups=feature_groups,
+                    mutation_prob=self.mprob,
+                )
+                child2 = ga.nominal_mutation(
+                    children=child2,
+                    features_groups=feature_groups,
+                    mutation_prob=self.mprob,
+                )
 
                 children[2 * j] = child1
                 children[2 * j + 1] = child2
 
-            # Elitism
             if self.elitism:
                 childId = np.random.choice(self.popsize, 1)
                 children[childId] = population[bestFitness_Id]
 
             population = children
+            print("")
+
+        sv = SaveResults(
+            results_path=RESULTS_PATH,
+            ngenerations=self.ngeneration,
+            output=output,
+            output_score=output_score,
+            best_individual=bestInd,
+            seed=SEED,
+        )
+
+        sv.main()

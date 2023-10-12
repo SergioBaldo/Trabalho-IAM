@@ -3,12 +3,16 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import (
-    accuracy_score,
     f1_score,
-    confusion_matrix,
-    classification_report,
     balanced_accuracy_score,
 )
+from dotenv import load_dotenv, find_dotenv
+import os
+
+
+load_dotenv(find_dotenv(), override=True)
+SEED = int(os.environ.get("SEED"))
+np.random.seed(SEED)
 
 
 def create_individual(individual_size, feature_names):
@@ -141,8 +145,8 @@ def fitness_function(individual, df_train, df_validation, fitness_hash_table):
         return fitness_hash_table[hash_key]
 
     # Extract selected features from the training and validation datasets
-    X_train = df_train.iloc[:, individual].values
-    X_validation = df_validation.iloc[:, individual].values
+    X_train = df_train[individual].values
+    X_validation = df_validation[individual].values
 
     # Extract target labels from the datasets
     y_train = df_train["subtype"]
@@ -154,7 +158,7 @@ def fitness_function(individual, df_train, df_validation, fitness_hash_table):
     y_validation = label_encoder.transform(y_validation)
 
     # Train a Random Forest Classifier
-    clf = RandomForestClassifier(n_estimators=500, random_state=42)
+    clf = RandomForestClassifier(n_estimators=500, random_state=42, n_jobs=-1)
     clf.fit(X_train, y_train)
 
     # Make predictions on the validation set
@@ -170,13 +174,14 @@ def fitness_function(individual, df_train, df_validation, fitness_hash_table):
     return (accuracy, f1_score_weighted)
 
 
-def nominal_mutation(children, name_of_features, mutation_prob=0.02):
+def nominal_mutation(children, features_groups, mutation_prob=0.02):
     """
     Apply nominal mutation to the children by randomly changing feature values.
 
     Parameters:
         children (list): List of feature values for the children.
-        name_of_features (list): List of available feature values to choose from.
+        features_groups (dict): A dictionary of feature groups, where each key corresponds to a gene and
+                               the value is a list of possible feature values for that gene.
         mutation_prob (float): Probability of mutation for each gene.
 
     Returns:
@@ -186,11 +191,8 @@ def nominal_mutation(children, name_of_features, mutation_prob=0.02):
 
     for gene in range(len(mutated_children)):
         if np.random.rand() < mutation_prob:
-            # Remove the current gene value from available options
-            name_of_features.remove(mutated_children[gene])
-
-            # Randomly select a new feature value from the remaining options
-            new_value = np.random.choice(name_of_features, 1, replace=False)[0]
+            # Randomly select a new feature value from the options
+            new_value = np.random.choice(features_groups[gene], 1, replace=False)[0]
 
             # Update the child's gene with the new value
             mutated_children[gene] = new_value

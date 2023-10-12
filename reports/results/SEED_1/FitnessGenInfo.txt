@@ -1,0 +1,4 @@
+MeanFitness, StdFitness, MaxFitness
+0.78,0.00,0.78
+0.79,0.00,0.79
+0.78,0.01,0.79
