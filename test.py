@@ -1,30 +1,23 @@
-from src.genetic_algorithm.genetic_search import GeneticSearch
-from src.wrapper.wrapper import Wrapper
+from src.genetic_algorithm.utils import create_feature_groups, run_best_individual
+import numpy as np
+from tqdm import trange
 from dotenv import load_dotenv, find_dotenv
-import os
+from src.genetic_algorithm import ga_functions as ga
+from src.genetic_algorithm.save_ga_results import SaveResults
+import os 
+import pandas as pd 
 
-
-# Load environment variables
 load_dotenv(find_dotenv(), override=True)
-POPSIZE = int(os.environ.get("POPSIZE"))
-N_GENERATION = int(os.environ.get("N_GENERATION"))
-CROSSOVER_PROB = float(os.environ.get("CROSSOVER_PROB"))
-MUTATION_PROB = float(os.environ.get("MUTATION_PROB"))
-TOUR_SIZE = int(os.environ.get("TOUR_SIZE"))
-INDIVIDUAL_SIZE = int(os.environ.get("INDIVIDUAL_SIZE"))
-ELITISM = eval(os.environ.get("ELITISM"))
+DATA_PATH = os.environ.get("DATA_PATH")
+RESULTS_PATH = os.environ.get("RESULTS_PATH")
+SEED = int(os.environ.get("SEED"))
 
 
-ga = GeneticSearch(
-    popsize=POPSIZE,
-    ngeneration=N_GENERATION,
-    cprob=CROSSOVER_PROB,
-    mprob=MUTATION_PROB,
-    tour_size=TOUR_SIZE,
-    individual_size=INDIVIDUAL_SIZE,
-    elitism=ELITISM,
-)
+np.random.seed(SEED)
+df_train = pd.read_csv(DATA_PATH + "/processed/data_train.csv")
 
-wrapper = Wrapper(ga)
+feature_names = list(df_train.columns)
+feature_names.remove("subtype")
 
-wrapper.select()
+
+run_best_individual(data_path=DATA_PATH, best_individual=feature_names, generation=None)

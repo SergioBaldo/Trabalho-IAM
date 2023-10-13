@@ -27,7 +27,7 @@ def create_individual(individual_size, feature_names):
         list: An individual with randomly selected feature names.
     """
     # Shuffle the list of feature names to create a random order
-    np.random.shuffle(feature_names)
+    np.random.shuffle(feature_names, )
 
     # Create the individual by selecting the first 'individual_size' names
     individual = feature_names[:individual_size]
@@ -158,7 +158,7 @@ def fitness_function(individual, df_train, df_validation, fitness_hash_table):
     y_validation = label_encoder.transform(y_validation)
 
     # Train a Random Forest Classifier
-    clf = RandomForestClassifier(n_estimators=500, random_state=42, n_jobs=-1)
+    clf = RandomForestClassifier(n_estimators=100, random_state=SEED, n_jobs=-1)
     clf.fit(X_train, y_train)
 
     # Make predictions on the validation set

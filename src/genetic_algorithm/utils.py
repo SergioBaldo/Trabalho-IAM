@@ -3,11 +3,6 @@ from src.models.RandomForestClassifierWrapper import RandomForestClassifierWrapp
 from dotenv import load_dotenv, find_dotenv
 import os
 
-load_dotenv(find_dotenv(), override=True)
-SEED = int(os.environ.get("SEED"))
-
-random.seed(SEED)
-
 
 def create_feature_groups(feature_names, individual_size):
     """
@@ -34,6 +29,7 @@ def create_feature_groups(feature_names, individual_size):
 
     # Create individual feature groups
     for i in range(individual_size):
+        random.seed(42)
         if num_features > 0:
             # Determine the number of elements to select
             num_elements_to_select = min(num_features, num_elements_per_individual)
