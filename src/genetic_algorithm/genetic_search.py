@@ -50,6 +50,21 @@ class GeneticSearch:
         self.individual_size = individual_size
         self.elitism = elitism
 
+    # def open_data(self, filepath: str) -> tuple:
+    #     """
+    #     Load and return training and validation data.
+
+    #     Args:
+    #         filepath (str): Path to data files.
+
+    #     Returns:
+    #         tuple: A tuple containing two dataframes representing training and validation data.
+    #     """
+    #     filepath = f"{filepath}/processed/"
+    #     df_train_GA = pd.read_csv(f"{filepath}dataGA_train.csv", index_col=None)
+    #     df_validation_GA = pd.read_csv(f"{filepath}dataGA_test.csv", index_col=None)
+    #     return df_train_GA, df_validation_GA
+    
     def open_data(self, filepath: str) -> tuple:
         """
         Load and return training and validation data.
@@ -61,9 +76,9 @@ class GeneticSearch:
             tuple: A tuple containing two dataframes representing training and validation data.
         """
         filepath = f"{filepath}/processed/"
-        df_train_GA = pd.read_csv(f"{filepath}dataGA_train.csv", index_col=None)
-        df_validation_GA = pd.read_csv(f"{filepath}dataGA_test.csv", index_col=None)
-        return df_train_GA, df_validation_GA
+        df = pd.read_csv(f"{filepath}data_train.csv", index_col=None)
+
+        return df 
 
     def search(self):
         """
@@ -71,7 +86,7 @@ class GeneticSearch:
 
         This method initializes populations, calculates fitness, and evolves populations over generations.
         """
-        df_train_GA, df_validation_GA = self.open_data(filepath=DATA_PATH)
+        df_train_GA = self.open_data(filepath=DATA_PATH)
         feature_names = list(df_train_GA.columns)
         feature_groups = create_feature_groups(
             feature_names=feature_names, individual_size=self.individual_size
@@ -101,11 +116,17 @@ class GeneticSearch:
             fitness = np.zeros(self.popsize)
             accuracy = np.zeros(self.popsize)
 
+            # for individual in trange(self.popsize, desc=f"Generation: {gen}"):
+            #     accuracy[individual], fitness[individual] = ga.fitness_function(
+            #         individual=population[individual],
+            #         df_train=df_train_GA,
+            #         df_validation=df_validation_GA,
+            #         fitness_hash_table=fitness_has_table,
+            #     )
             for individual in trange(self.popsize, desc=f"Generation: {gen}"):
                 accuracy[individual], fitness[individual] = ga.fitness_function(
                     individual=population[individual],
-                    df_train=df_train_GA,
-                    df_validation=df_validation_GA,
+                    df=df_train_GA,
                     fitness_hash_table=fitness_has_table,
                 )
 

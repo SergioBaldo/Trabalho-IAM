@@ -5,9 +5,11 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import (
     f1_score,
     balanced_accuracy_score,
+    classification_report
 )
 from dotenv import load_dotenv, find_dotenv
 import os
+from sklearn.model_selection import StratifiedKFold
 
 
 load_dotenv(find_dotenv(), override=True)
@@ -123,14 +125,65 @@ def two_point_crossover(parent1, parent2, cprob):
     return children1, children2
 
 
-def fitness_function(individual, df_train, df_validation, fitness_hash_table):
+# def fitness_function(individual, df_train, df_validation, fitness_hash_table):
+#     """
+#     Calculate fitness for an individual.
+
+#     Parameters:
+#     - individual (list): A list of names representing the selected features.
+#     - df_train (pandas.DataFrame): Training dataset.
+#     - df_validation (pandas.DataFrame): Validation dataset.
+#     - fitness_hash_table (dict): A dictionary to cache fitness values for reuse.
+
+#     Returns:
+#     - tuple: A tuple containing accuracy and weighted F1-score.
+#     """
+
+#     # Convert the individual into a hash key for caching
+#     hash_key = "".join(np.array(np.array(individual, dtype="O"), dtype="O"))
+
+#     # Check if the fitness value is already calculated and cached
+#     if hash_key in fitness_hash_table:
+#         return fitness_hash_table[hash_key]
+
+#     # Extract selected features from the training and validation datasets
+#     X_train = df_train[individual].values
+#     X_validation = df_validation[individual].values
+
+#     # Extract target labels from the datasets
+#     y_train = df_train["subtype"]
+#     y_validation = df_validation["subtype"]
+
+#     # Encode target labels using LabelEncoder
+#     label_encoder = LabelEncoder()
+#     y_train = label_encoder.fit_transform(y_train)
+#     y_validation = label_encoder.transform(y_validation)
+
+#     # Train a Random Forest Classifier
+#     clf = RandomForestClassifier(n_estimators=100, random_state=SEED, n_jobs=-1)
+#     clf.fit(X_train, y_train)
+
+#     # Make predictions on the validation set
+#     y_pred = clf.predict(X_validation)
+
+#     # Calculate accuracy and weighted F1-score
+#     accuracy = balanced_accuracy_score(y_validation, y_pred)
+#     f1_score_weighted = f1_score(y_validation, y_pred, average="weighted")
+
+#     # Cache the fitness value
+#     fitness_hash_table[hash_key] = accuracy, f1_score_weighted
+
+#     return (accuracy, f1_score_weighted)
+
+
+
+def fitness_function(individual, df, fitness_hash_table):
     """
     Calculate fitness for an individual.
 
     Parameters:
     - individual (list): A list of names representing the selected features.
-    - df_train (pandas.DataFrame): Training dataset.
-    - df_validation (pandas.DataFrame): Validation dataset.
+    - df (pandas.DataFrame): The dataset.
     - fitness_hash_table (dict): A dictionary to cache fitness values for reuse.
 
     Returns:
@@ -143,36 +196,53 @@ def fitness_function(individual, df_train, df_validation, fitness_hash_table):
     # Check if the fitness value is already calculated and cached
     if hash_key in fitness_hash_table:
         return fitness_hash_table[hash_key]
-
+    
     # Extract selected features from the training and validation datasets
-    X_train = df_train[individual].values
-    X_validation = df_validation[individual].values
-
+    X = df[individual].values
+    
     # Extract target labels from the datasets
-    y_train = df_train["subtype"]
-    y_validation = df_validation["subtype"]
+    y = df["subtype"]
 
-    # Encode target labels using LabelEncoder
-    label_encoder = LabelEncoder()
-    y_train = label_encoder.fit_transform(y_train)
-    y_validation = label_encoder.transform(y_validation)
+    # Quando chamado o objeto devemos informar a quantidade de divisões que queremos
+    skfolds = StratifiedKFold(n_splits=5)
+    
+    accuracy_cv = []
+    f1_score_weighted_cv = []
 
-    # Train a Random Forest Classifier
-    clf = RandomForestClassifier(n_estimators=100, random_state=SEED, n_jobs=-1)
-    clf.fit(X_train, y_train)
+    for train_index, test_index  in skfolds.split(X, y):
+        clf = RandomForestClassifier(n_estimators=100, random_state=SEED, n_jobs=-1)
+        X_train = X[train_index]
+        y_train = y[train_index]
+        
+        X_test = X[test_index]
+        y_test = y[test_index]
+        
+        # Encode target labels using LabelEncoder
+        label_encoder = LabelEncoder()
+        y_train = label_encoder.fit_transform(y_train)
+        y_test = label_encoder.transform(y_test)
 
-    # Make predictions on the validation set
-    y_pred = clf.predict(X_validation)
+        # Train a Random Forest Classifier
+        clf.fit(X_train, y_train)
 
-    # Calculate accuracy and weighted F1-score
-    accuracy = balanced_accuracy_score(y_validation, y_pred)
-    f1_score_weighted = f1_score(y_validation, y_pred, average="weighted")
+        # Make predictions on the validation set
+        y_pred = clf.predict(X_test)
 
+        # Calculate accuracy and weighted F1-score
+        accuracy = balanced_accuracy_score(y_test, y_pred)
+        f1_score_weighted = f1_score(y_test, y_pred, average="weighted")
+        
+        accuracy_cv.append(accuracy)
+        f1_score_weighted_cv.append(f1_score_weighted)
+
+    
+    mean_accuracy =  np.mean(np.array(accuracy_cv))
+    mean_f1_score_weigted = np.mean(np.array(f1_score_weighted_cv))
+    
     # Cache the fitness value
-    fitness_hash_table[hash_key] = accuracy, f1_score_weighted
+    fitness_hash_table[hash_key] = mean_accuracy, mean_f1_score_weigted
 
-    return (accuracy, f1_score_weighted)
-
+    return (mean_accuracy, mean_f1_score_weigted)
 
 def nominal_mutation(children, features_groups, mutation_prob=0.02):
     """
