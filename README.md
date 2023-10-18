@@ -103,6 +103,3 @@ Como criar um ambiente virtual usando tanto o Conda quanto o método `venv` do P
 5. Para instalar os pacotes Python usando `pip` dentro do ambiente, basta usar o seguinte comando: 
 
 `pip install -r requirements.txt`
-
-
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
