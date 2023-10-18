@@ -103,3 +103,10 @@ Como criar um ambiente virtual usando tanto o Conda quanto o método `venv` do P
 5. Para instalar os pacotes Python usando `pip` dentro do ambiente, basta usar o seguinte comando: 
 
 `pip install -r requirements.txt`
+
+
+## Para Executar o projeto
+
+Para executar o projeto basta utilizar o seguinte comando:
+
+`python main.py`
