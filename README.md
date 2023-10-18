@@ -79,7 +79,7 @@ Como criar um ambiente virtual usando tanto o Conda quanto o método `venv` do P
 
 `conda activate meuambiente`
 
-4. Para instalar os pacotes usando Python `conda` ou `pip` dentro do ambiente basta usar o seguinte comando: 
+4. Para instalar os pacotes Python usando `conda` ou `pip` dentro do ambiente basta usar o seguinte comando: 
 
 `pip install -r requirements.txt`
 
