@@ -1,7 +1,4 @@
 import random
-from src.models.RandomForestClassifierWrapper import RandomForestClassifierWrapper
-from dotenv import load_dotenv, find_dotenv
-import os
 
 
 def create_feature_groups(feature_names, individual_size):
@@ -24,7 +21,7 @@ def create_feature_groups(feature_names, individual_size):
     features_names_dict = {}
 
     num_features = len(feature_names)
-    num_elements_per_individual = (num_features // individual_size) + 1
+    num_elements_per_individual = num_features // individual_size + 1
     remaining_features = feature_names[:]
 
     # Create individual feature groups
@@ -37,6 +34,7 @@ def create_feature_groups(feature_names, individual_size):
             selected_subset = random.sample(remaining_features, num_elements_to_select)
             features_names_dict[i] = selected_subset
             num_features -= num_elements_to_select
+            # print(num_features)
 
             # Remove selected elements from remaining_features
             remaining_features = [
@@ -44,32 +42,3 @@ def create_feature_groups(feature_names, individual_size):
             ]
 
     return features_names_dict
-
-
-def run_best_individual(data_path, best_individual, generation):
-    """
-    Test the best individual with the original train and test datasets and display the results.
-
-    Args:
-        data_path (str): The path to the data file.
-        best_individual (list): The best features selected by the individual.
-        generation (int): The generation number.
-
-    Prints:
-        - Random Forest Model Balanced Accuracy and Weighted Averaged F1 Score with the best features.
-        - Balanced Accuracy
-        - Weighted Averaged F1 Score
-        - Confusion Matrix
-    """
-    # Test the best individual
-    rf_wrapper = RandomForestClassifierWrapper(
-        data_file=data_path, target_column="subtype", best_features=best_individual
-    )
-    accuracy, f1_score, confusion_matrix = rf_wrapper.train_and_evaluate()
-
-    print(
-        f"- Random Forest Model: Balanced Accuracy and Weighted Averaged F1 Score with the best features of generation {generation}"
-    )
-    print(f"- Balanced Accuracy: {accuracy:.2f}, Weighted Averaged F1 Score: {f1_score:.2f}")
-    print("- Confusion Matrix")
-    print(confusion_matrix)

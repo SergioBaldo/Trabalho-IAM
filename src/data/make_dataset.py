@@ -51,13 +51,7 @@ if __name__ == "__main__":
     interim_path = f"{DATA_PATH}/interim/"
     processed_path = f"{DATA_PATH}/processed/"
 
-    # Preprocess and split the initial dataset
+    # Preprocess and split the dataset
     preprocess_and_split_data(
         input_filepath=f"{interim_path}dataset.csv", output_filepath_prefix=f"{processed_path}data"
-    )
-
-    # Preprocess and split the processed training dataset
-    preprocess_and_split_data(
-        input_filepath=f"{processed_path}data_train.csv",
-        output_filepath_prefix=f"{processed_path}dataGA",
     )

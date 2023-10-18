@@ -3,22 +3,31 @@ class Wrapper:
     A class that acts as a wrapper for different selection methods.
 
     Attributes:
-        selection_method (object): The selection method to be used.
+        clf (object): The classifier or model to be used.
+        sm (object): The selection method to be used.
+        X (array-like): The feature data.
+        y (array-like): The target data.
     """
 
-    def __init__(self, selection_method):
+    def __init__(self, clf, sm, X, y):
         """
-        Initializes a new Wrapper instance.
+        Initializes a new SelectionWrapper instance.
 
         Args:
-            selection_method (object): An object representing the selection method.
+            clf (object): An object representing the classifier or model.
+            sm (object): An object representing the selection method.
+            X (array-like): The feature data.
+            y (array-like): The target data.
         """
-        self.selection_method = selection_method
+        self.clf = clf
+        self.sm = sm
+        self.X = X
+        self.y = y
 
-    def select(self):
+    def select(self, X, y):
         """
         Perform the selection using the specified selection method.
 
         Calls the `search` method of the selection method to initiate the selection process.
         """
-        self.selection_method.search()
+        self.sm.search(self.clf, self.X, self.y)
