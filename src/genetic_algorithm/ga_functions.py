@@ -14,26 +14,24 @@ K_FOLD = int(os.environ.get("K_FOLD"))
 np.random.seed(SEED)
 
 
-def create_individual(individual_size, feature_names):
+def create_individual(individual_size, feature_groups):
     """
     Create an individual for a genetic algorithm with a specified size.
 
     Parameters:
         individual_size (int): The number of features in the individual.
-        name_of_features (list): List of available feature names to choose from.
+        features_groups (dict): A dictionary of feature groups, where each key corresponds to a gene and
+                               the value is a list of possible feature values for that gene.
 
     Returns:
         list: An individual with randomly selected feature names.
     """
-    # Shuffle the list of feature names to create a random order
-    np.random.shuffle(
-        feature_names,
-    )
-
-    # Create the individual by selecting the first 'individual_size' names
-    individual = feature_names[:individual_size]
+    individual = np.zeros(individual_size, dtype="O")
+    for gene in range(individual_size):
+        individual[gene] = np.random.choice(feature_groups[gene], 1, replace=False)[0]
 
     return individual
+
 
 
 def roulette_selection(fitness, population, k_tour=2):

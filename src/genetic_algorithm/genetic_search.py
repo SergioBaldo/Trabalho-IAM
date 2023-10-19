@@ -107,7 +107,7 @@ class GeneticSearch:
         # Generate individuals
         for i in range(self.popsize):
             population[i] = create_individual(
-                individual_size=self.individual_size, feature_names=feature_names
+                individual_size=self.individual_size, feature_groups=feature_groups
             )
 
         for gen in range(self.ngeneration):
