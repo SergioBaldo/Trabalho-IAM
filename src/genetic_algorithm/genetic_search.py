@@ -12,7 +12,7 @@ from src.genetic_algorithm.ga_functions import (
     fitness_function,
     create_individual,
 )
-from src.genetic_algorithm.utils import create_feature_groups
+from src.utils.utils_ga import create_feature_groups
 from src.genetic_algorithm.save_ga_results import SaveResults
 
 load_dotenv(find_dotenv(), override=True)
