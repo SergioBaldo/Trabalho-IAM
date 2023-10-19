@@ -1,0 +1,11 @@
+{
+    "Popsize": 100,
+    "Ngenerations": 100,
+    "Crossover_prob": 0.6,
+    "Mutation_prob": 0.02,
+    "Tour_size": 2,
+    "Individual_size": 500,
+    "Elitism": true,
+    "seed": 1,
+    "Time_to_exec_GA": "296.45 min"
+}
