@@ -10,6 +10,7 @@ from sklearn.model_selection import StratifiedKFold
 
 load_dotenv(find_dotenv(), override=True)
 SEED = int(os.environ.get("SEED"))
+K_FOLD = int(os.environ.get("K_FOLD"))
 np.random.seed(SEED)
 
 
@@ -151,7 +152,7 @@ def fitness_function(clf, X, y, individual, fitness_hash_table):
     X_selected = X[individual]
 
     # Stratified k-fold cross-validation
-    skfolds = StratifiedKFold(n_splits=10)
+    skfolds = StratifiedKFold(n_splits=K_FOLD)
 
     accuracy_scores = []
     weighted_f1_scores = []
