@@ -151,7 +151,7 @@ def fitness_function(clf, X, y, individual, fitness_hash_table):
     X_selected = X[individual]
 
     # Stratified k-fold cross-validation
-    skfolds = StratifiedKFold(n_splits=5)
+    skfolds = StratifiedKFold(n_splits=10)
 
     accuracy_scores = []
     weighted_f1_scores = []
