@@ -33,7 +33,6 @@ def create_individual(individual_size, feature_groups):
     return individual
 
 
-
 def roulette_selection(fitness, population, k_tour=2):
     """
     Perform roulette wheel selection to choose two parents from the population based on their fitness values.
