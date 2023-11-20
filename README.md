@@ -42,7 +42,7 @@ Organização do Projeto
     │       └── wrapper.py      <- Implementação de métodos de "wrapper".
     |   
     │
-    └── main.py     <- O arquivo principal para executar o programa.
+    └── main.py     <- O arquivo principal para executar o projeto.
 
 --------
 
