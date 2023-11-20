@@ -6,60 +6,43 @@ A classificação de subtipos tumorais de gliomas a partir de marcadores molecul
 Organização do Projeto
 ------------
 
-    ├── LICENSE
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
+    ├── LICENSE            <- Termos de licença que regem o uso do software.
+    ├── README.md          <- Documentação principal que fornece informações sobre o projeto, incluindo uma descrição geral e instruções de uso.
+    ├── data               <- Esta pasta contém subpastas relacionadas ao gerenciamento de dados.
+    │   ├── interim        <- Local onde dados temporários ou em processo são armazenados.
+    │   ├── processed      <- Contém dados após processamento.
+    │   └── raw            <- Dados brutos sem qualquer processamento.
+    |
+    ├── references         <- Referências relevantes para o projeto.
     │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
+    ├── reports            <- Pasta destinada a relatórios e resultados.
+    │   └── results        <- Armazena os resultados das execuções do Algoritmo Genético
     │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
+    ├── requirements.txt   <- Lista das dependências do projeto que podem ser instaladas usando um gerenciador de pacotes.
     │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
+    ├── .env               <- Arquivo contendo as variáveis de ambiente.
     │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── results        <- Generated graphics and figures to be used in reporting         
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── .env               <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
+    ├── src                <- Esta pasta contém o código-fonte do projeto.
+    │   ├── __init__.py    <- Arquivo que indica que o diretório deve ser considerado um pacote Python.
     │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
+    │   ├── data                    <- Subpasta relacionada ao manuseio de dados.
+    │   │   └── make_dataset.py     <- Script para criar os conjuntos de dados em treino e teste.
     │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
     │   │
-    │   ├── genetic_algorithm       <- Scripts to turn raw data into features for modeling
-    │   │   └── ga_functions.py
-    │   │   └── genetic_search.py
-    │   │   └── save_ga_results.py
-    │   │   └── utils.py
+    │   ├── genetic_algorithm       <- Contém scripts relacionados ao algoritmo genético.
+    │   │   └── ga_functions.py     <- Funções principais do algoritmo genético.
+    │   │   └── genetic_search.py   <- Implementação do algoritmo de busca genética.
+    │   │   └── save_ga_results.py  <- Script para salvar resultados do algoritmo genético.
     │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   ├── wrapper       <- Scripts to turn raw data into features for modeling
-    │   │   └── wrapper.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
+    │   ├── util                                        <- Contém scripts utilitários.
+    │   │   └── feature_selection_and_evaluation.py     <- Script para a avaliação da seleção de atributos.
+    |   |   └── utils_ga.py                             <- Funções utilitárias para o algoritmo genético.
+    │   │ 
+    │   ├── wrapper             <- Contém scripts relacionados a "wrapper methods".
+    │       └── wrapper.py      <- Implementação de métodos de "wrapper".
+    |   
     │
-    └── main.py            <- 
-
+    └── main.py     <- O arquivo principal para executar o programa.
 
 --------
 
